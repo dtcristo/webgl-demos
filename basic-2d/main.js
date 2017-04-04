@@ -1,4 +1,5 @@
 function main() {
+  // Get A WebGL context
   var canvas = document.getElementById("canvas");
   var gl = canvas.getContext("webgl2");
 
@@ -48,33 +49,32 @@ function main() {
   }
   `;
 
-  var vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-  var fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+  // Compile the shaders and link into a program
+  var program = createProgram(gl, vertexShaderSource, fragmentShaderSource);
 
-  var program = createProgram(gl, vertexShader, fragmentShader);
-
+  // Look up where the vertex data needs to go
   var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+
+  // Look up uniform locations
   var resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
   var colorLocation = gl.getUniformLocation(program, "u_color");
 
+  // Create a buffer
   var positionBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
-  // three 2d points
-  var positions = [
-    10, 20,
-    80, 20,
-    10, 30,
-    10, 30,
-    80, 20,
-    80, 30,
-  ];
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-
+  // Create a vertex array object (attribute state)
   var vao = gl.createVertexArray();
+
+  // and make it the one we're currently working with
   gl.bindVertexArray(vao);
+
+  // Turn on the attribute
   gl.enableVertexAttribArray(positionAttributeLocation);
 
+  // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+  // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
   var size = 2;          // 2 components per iteration
   var type = gl.FLOAT;   // the data is 32bit floats
   var normalize = false; // don't normalize the data
@@ -90,17 +90,17 @@ function main() {
   // Tell it to use our program (pair of shaders)
   gl.useProgram(program);
 
-  // Bind the attribute/buffer set we want.
+  // Bind the attribute/buffer set we want
   gl.bindVertexArray(vao);
 
   var needToRender = true;  // draw at least once
   function render() {
-     if (resize(gl) || needToRender) {
-      //  alert('here');
-       needToRender = false;
-       draw(gl, resolutionUniformLocation, colorLocation);
-     }
-     requestAnimationFrame(render);
+    // Check for canvas resize
+    if (resize(gl) || needToRender) {
+      needToRender = false;
+      draw(gl, resolutionUniformLocation, colorLocation);
+    }
+    requestAnimationFrame(render);
   }
   render();
 }
@@ -111,14 +111,15 @@ function draw(gl, resolutionUniformLocation, colorLocation) {
   gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
 
   gl.clear(gl.COLOR_BUFFER_BIT);
-  // draw 50 random rectangles in random colors
+  // Draw 50 random rectangles in random colors
   for (var ii = 0; ii < 50; ++ii) {
+    var width = randomInt(300);
+    var height = randomInt(300);
+    var x = randomInt(gl.canvas.width - width);
+    var y = randomInt(gl.canvas.height - height);
+
     // Setup a random rectangle
-    setRectangle(gl,
-      randomInt(gl.canvas.width - randomInt(300)),
-      randomInt(gl.canvas.height - randomInt(300)),
-      randomInt(300), randomInt(300)
-    );
+    setRectangle(gl, x, y, width, height);
     // setRectangle(gl, 10, 10, 100, 100);
 
     // Set a random color.
@@ -156,20 +157,9 @@ function resize(gl) {
   return false;
 }
 
-function createShader(gl, type, source) {
-  var shader = gl.createShader(type);
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-  if (success) {
-    return shader;
-  }
-
-  console.log(gl.getShaderInfoLog(shader));
-  gl.deleteShader(shader);
-}
-
-function createProgram(gl, vertexShader, fragmentShader) {
+function createProgram(gl, vertexShaderSource, fragmentShaderSource) {
+  var vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+  var fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
   var program = gl.createProgram();
   gl.attachShader(program, vertexShader);
   gl.attachShader(program, fragmentShader);
@@ -181,6 +171,19 @@ function createProgram(gl, vertexShader, fragmentShader) {
 
   console.log(gl.getProgramInfoLog(program));
   gl.deleteProgram(program);
+}
+
+function createShader(gl, type, source) {
+  var shader = gl.createShader(type);
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+  if (success) {
+    return shader;
+  }
+
+  console.log(gl.getShaderInfoLog(shader));
+  gl.deleteShader(shader);
 }
 
 // Returns a random integer from 0 to range - 1.
