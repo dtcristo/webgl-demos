@@ -18,11 +18,15 @@ function main() {
   in vec2 a_position;
 
   uniform vec2 u_resolution;
+  uniform vec2 u_translation;
 
   // all shaders have a main function
   void main() {
+    // Add in the translation
+    vec2 position = a_position + u_translation;
+
     // convert the position from pixels to 0.0 to 1.0
-    vec2 zeroToOne = a_position / u_resolution;
+    vec2 zeroToOne = position / u_resolution;
 
     // convert from 0->1 to 0->2
     vec2 zeroToTwo = zeroToOne * 2.0;
@@ -60,6 +64,7 @@ function main() {
 
   // Look up uniform locations
   var resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
+  var translationUniformLocation = gl.getUniformLocation(program, "u_translation");
   var colorLocation = gl.getUniformLocation(program, "u_color");
 
   // Create a buffer
@@ -104,7 +109,7 @@ function main() {
   var color = randomColor();
 
   // Initial position
-  var pos = [
+  var translation = [
     randomInt(gl.canvas.width - width),
     randomInt(gl.canvas.height - height)
   ];
@@ -117,13 +122,13 @@ function main() {
     // Clear to black
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    // Set canvas size uniform
+    // Set uniforms
     gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
-    // Set colour uniform
+    gl.uniform2fv(translationUniformLocation, translation);
     gl.uniform4fv(colorLocation, color);
 
-    // Setup rectangle data in buffer
-    setRectangle(gl, pos[0], pos[1], 100, 100);
+    // Setup rectangle data in buffer at origin
+    setRectangle(gl, 0, 0, 100, 100);
 
     // Draw buffers
     var primitiveType = gl.TRIANGLES;
@@ -131,22 +136,22 @@ function main() {
     var count = 6;
     gl.drawArrays(primitiveType, offset, count);
 
-    xRight ? pos[0]++ : pos[0]--;
-    yDown ? pos[1]++ : pos[1]--;
-
-    if (pos[0] <= 0) {
+    // Update translation and directions
+    xRight ? translation[0]++ : translation[0]--;
+    yDown ? translation[1]++ : translation[1]--;
+    if (translation[0] <= 0) {
       if (!xRight) { color = randomColor(); }
       xRight = true;
     }
-    if (pos[0] + width >= gl.canvas.width) {
+    if (translation[0] + width >= gl.canvas.width) {
       if (xRight) { color = randomColor(); }
       xRight = false;
     }
-    if (pos[1] <= 0) {
+    if (translation[1] <= 0) {
       if (!yDown) { color = randomColor(); }
       yDown = true;
     }
-    if (pos[1] + height >= gl.canvas.height) {
+    if (translation[1] + height >= gl.canvas.height) {
       if (yDown) { color = randomColor(); }
       yDown = false;
     }
