@@ -91,9 +91,8 @@ function main() {
   gl.vertexAttribPointer(
       positionAttributeLocation, size, type, normalize, stride, offset);
 
-  // Clear the canvas to black
+  // Set the clear color to black
   gl.clearColor(0, 0, 0, 1);
-  gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Tell it to use our program (pair of shaders)
   gl.useProgram(program);
@@ -105,14 +104,19 @@ function main() {
   var width = 100;
   var height = 100;
 
-  // Initial colour
-  var color = randomColor();
+  // Setup rectangle data in buffer
+  setRectangle(gl, width, height);
 
-  // Initial position
+  // Initial translation
   var translation = [
     randomInt(gl.canvas.width - width),
     randomInt(gl.canvas.height - height)
   ];
+
+  // Initial colour
+  var color = randomColor();
+
+  // Movement directions
   var xRight = true;
   var yDown = true;
 
@@ -126,9 +130,6 @@ function main() {
     gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
     gl.uniform2fv(translationUniformLocation, translation);
     gl.uniform4fv(colorLocation, color);
-
-    // Setup rectangle data in buffer at origin
-    setRectangle(gl, 0, 0, 100, 100);
 
     // Draw buffers
     var primitiveType = gl.TRIANGLES;
@@ -156,8 +157,11 @@ function main() {
       yDown = false;
     }
 
+    // Loop on new frame
     requestAnimationFrame(render);
   }
+
+  // Start render loop
   render();
 }
 
@@ -171,11 +175,11 @@ function randomInt(range) {
 }
 
 // Fills the buffer with the values that define a rectangle.
-function setRectangle(gl, x, y, width, height) {
-  var x1 = x;
-  var x2 = x + width;
-  var y1 = y;
-  var y2 = y + height;
+function setRectangle(gl, width, height) {
+  var x1 = 0;
+  var x2 = width;
+  var y1 = 0;
+  var y2 = height;
 
   // NOTE: gl.bufferData(gl.ARRAY_BUFFER, ...) will affect
   // whatever buffer is bound to the `ARRAY_BUFFER` bind point
@@ -183,12 +187,12 @@ function setRectangle(gl, x, y, width, height) {
   // buffer we'd want to bind that buffer to `ARRAY_BUFFER` first.
 
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-     x1, y1,
-     x2, y1,
-     x1, y2,
-     x1, y2,
-     x2, y1,
-     x2, y2]), gl.STATIC_DRAW);
+    x1, y1,
+    x2, y1,
+    x1, y2,
+    x1, y2,
+    x2, y1,
+    x2, y2]), gl.STATIC_DRAW);
 }
 
 function canvasAndViewportResize(gl) {
