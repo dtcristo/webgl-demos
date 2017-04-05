@@ -134,14 +134,21 @@ function main() {
     xRight ? pos[0]++ : pos[0]--;
     yDown ? pos[1]++ : pos[1]--;
 
-    if (pos[0] <= 0 || pos[0] + width >= gl.canvas.width) {
-      xRight = !xRight;
-      color = randomColor();
+    if (pos[0] <= 0) {
+      if (!xRight) { color = randomColor(); }
+      xRight = true;
     }
-
-    if (pos[1] <= 0 || pos[1] + height >= gl.canvas.height) {
-      yDown = !yDown;
-      color = randomColor();
+    if (pos[0] + width >= gl.canvas.width) {
+      if (xRight) { color = randomColor(); }
+      xRight = false;
+    }
+    if (pos[1] <= 0) {
+      if (!yDown) { color = randomColor(); }
+      yDown = true;
+    }
+    if (pos[1] + height >= gl.canvas.height) {
+      if (yDown) { color = randomColor(); }
+      yDown = false;
     }
 
     requestAnimationFrame(render);
