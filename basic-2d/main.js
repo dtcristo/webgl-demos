@@ -8,7 +8,7 @@ function main() {
     return;
   }
 
-  var vertexShaderSource = `#version 300 es
+  var vs = `#version 300 es
 
   // an attribute is an input (in) to a vertex shader.
   // It will receive data from a buffer
@@ -32,7 +32,7 @@ function main() {
   }
   `;
 
-  var fragmentShaderSource = `#version 300 es
+  var fs = `#version 300 es
 
   // fragment shaders don't have a default precision so we need
   // to pick one. mediump is a good default. It means "medium precision"
@@ -50,7 +50,7 @@ function main() {
   `;
 
   // Compile the shaders and link into a program
-  var program = createProgram(gl, vertexShaderSource, fragmentShaderSource);
+  var program = webglUtils.createProgramFromSources(gl, [vs, fs]);
 
   // Look up where the vertex data needs to go
   var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
@@ -96,7 +96,7 @@ function main() {
   var needToRender = true;  // draw at least once
   function render() {
     // Check for canvas resize
-    if (resize(gl) || needToRender) {
+    if (checkCanvasAndViewportResize(gl) || needToRender) {
       needToRender = false;
       draw(gl, resolutionUniformLocation, colorLocation);
     }
@@ -133,59 +133,6 @@ function draw(gl, resolutionUniformLocation, colorLocation) {
   }
 }
 
-function resize(gl) {
-  var canvas = gl.canvas;
-  var cssToRealPixels = window.devicePixelRatio || 1;
-
-  // Lookup the size the browser is displaying the canvas in CSS pixels
-  // and compute a size needed to make our drawingbuffer match it in
-  // device pixels.
-  var displayWidth  = Math.floor(canvas.clientWidth  * cssToRealPixels);
-  var displayHeight = Math.floor(canvas.clientHeight * cssToRealPixels);
-
-  // Check if the canvas is not the same size.
-  if (canvas.width  !== displayWidth ||
-      canvas.height !== displayHeight) {
-
-    // Make the canvas the same size
-    canvas.width  = displayWidth;
-    canvas.height = displayHeight;
-
-    gl.viewport(0, 0, displayWidth, displayHeight);
-    return true;
-  }
-  return false;
-}
-
-function createProgram(gl, vertexShaderSource, fragmentShaderSource) {
-  var vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-  var fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-  var program = gl.createProgram();
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragmentShader);
-  gl.linkProgram(program);
-  var success = gl.getProgramParameter(program, gl.LINK_STATUS);
-  if (success) {
-    return program;
-  }
-
-  console.log(gl.getProgramInfoLog(program));
-  gl.deleteProgram(program);
-}
-
-function createShader(gl, type, source) {
-  var shader = gl.createShader(type);
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-  if (success) {
-    return shader;
-  }
-
-  console.log(gl.getShaderInfoLog(shader));
-  gl.deleteShader(shader);
-}
-
 // Returns a random integer from 0 to range - 1.
 function randomInt(range) {
   return Math.floor(Math.random() * range);
@@ -210,4 +157,14 @@ function setRectangle(gl, x, y, width, height) {
      x1, y2,
      x2, y1,
      x2, y2]), gl.STATIC_DRAW);
+}
+
+function checkCanvasAndViewportResize(gl) {
+  var cssToRealPixels = window.devicePixelRatio || 1;
+  if (webglUtils.resizeCanvasToDisplaySize(gl.canvas, cssToRealPixels)) {
+    // Update viewport to new canvas size
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    return true;
+  }
+  return false;
 }
