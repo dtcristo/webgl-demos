@@ -187,7 +187,8 @@ function setRectangle(gl, x, y, width, height) {
 }
 
 function canvasAndViewportResize(gl) {
-  var cssToRealPixels = window.devicePixelRatio || 1;
+  // var cssToRealPixels = window.devicePixelRatio || 1;
+  var cssToRealPixels = 1;
   if (webglUtils.resizeCanvasToDisplaySize(gl.canvas, cssToRealPixels)) {
     // Update viewport to new canvas size
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
