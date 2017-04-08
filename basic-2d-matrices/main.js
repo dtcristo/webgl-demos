@@ -105,7 +105,7 @@ function main() {
       randomInt(gl.canvas.height - height)
     ],
     angle: 20,
-    scale: [1, 1],
+    scale: [1, 2],
     color: randomColor(),
     xRight: true,
     yDown: true,
