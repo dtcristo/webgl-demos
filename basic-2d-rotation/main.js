@@ -114,8 +114,8 @@ function main() {
   let width = 100;
   let height = 100;
 
-  // Setup rectangle data in buffer
-  let vertexCount = setRectangle(gl, width, height);
+  // Setup buffer data
+  let vertexCount = setGeometry(gl);
 
   // Initial translation
   let translation = [
@@ -256,4 +256,40 @@ function setRectangle(gl, width, height) {
     x2, y2]), gl.STATIC_DRAW);
 
     return 6;
+}
+
+function setGeometry(gl) {
+  var width = 100;
+  var height = 150;
+  var x = -width/2;
+  var y = -height/2;
+  var thickness = 30;
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array([
+      // left column
+      x, y,
+      x + thickness, y,
+      x, y + height,
+      x, y + height,
+      x + thickness, y,
+      x + thickness, y + height,
+
+      // top rung
+      x + thickness, y,
+      x + width, y,
+      x + thickness, y + thickness,
+      x + thickness, y + thickness,
+      x + width, y,
+      x + width, y + thickness,
+
+      // middle rung
+      x + thickness, y + thickness * 2,
+      x + width * 2 / 3, y + thickness * 2,
+      x + thickness, y + thickness * 3,
+      x + thickness, y + thickness * 3,
+      x + width * 2 / 3, y + thickness * 2,
+      x + width * 2 / 3, y + thickness * 3]),
+    gl.STATIC_DRAW);
+  return 18;
 }
