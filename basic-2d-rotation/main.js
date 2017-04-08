@@ -7,13 +7,17 @@ in vec2 a_position;
 uniform vec2 u_resolution;
 uniform vec2 u_translation;
 uniform vec2 u_rotation;
+uniform vec2 u_scale;
 
 // all shaders have a main function
 void main() {
+  // Scale the positon
+  vec2 scaledPosition = a_position * u_scale;
+
   // Rotate the position
   vec2 rotatedPosition = vec2(
-    a_position.x * u_rotation.y + a_position.y * u_rotation.x,
-    a_position.y * u_rotation.y - a_position.x * u_rotation.x);
+   scaledPosition.x * u_rotation.y + scaledPosition.y * u_rotation.x,
+   scaledPosition.y * u_rotation.y - scaledPosition.x * u_rotation.x);
 
   // Add in the translation
   vec2 position = rotatedPosition + u_translation;
@@ -74,6 +78,7 @@ function main() {
     { name: "u_resolution", type: "2f" },
     { name: "u_translation", type: "2f" },
     { name: "u_rotation", type: "2f" },
+    { name: "u_scale", type: "2f" },
     { name: "u_color", type: "4f" },
   ]);
 
@@ -110,29 +115,52 @@ function main() {
   // Bind the attribute/buffer set we want
   gl.bindVertexArray(vao);
 
-  // Dimentions of rectangle
-  let width = 100;
-  let height = 100;
+  // --------------------------------------------------------------------------
 
   // Setup buffer data
   let vertexCount = setGeometry(gl);
 
-  // Initial translation
-  let translation = [
-    randomInt(gl.canvas.width - width),
-    randomInt(gl.canvas.height - height)
-  ];
+  // Bounding box, for wall collision
+  let width = 100;
+  let height = 100;
 
-  // Initial rotation
-  let rotation = [0, 1];
-  angle = 20;
+  // Initial state
+  let state = {
+    translation: [
+      randomInt(gl.canvas.width - width),
+      randomInt(gl.canvas.height - height)
+    ],
+    angle: 20,
+    scale: [1, 0.75],
+    color: randomColor(),
+    xRight: true,
+    yDown: true,
+  }
 
-  // Initial colour
-  let color = randomColor();
+  function updateState() {
+    // Update angle
+    state.angle = state.angle + 2;
 
-  // Movement directions
-  let xRight = true;
-  let yDown = true;
+    // Update translation and directions
+    state.xRight ? state.translation[0]++ : state.translation[0]--;
+    state.yDown ? state.translation[1]++ : state.translation[1]--;
+    if (state.translation[0] <= 0) {
+      if (!state.xRight) { state.color = randomColor(); }
+      state.xRight = true;
+    }
+    if (state.translation[0] + width >= gl.canvas.width) {
+      if (state.xRight) { state.color = randomColor(); }
+      state.xRight = false;
+    }
+    if (state.translation[1] <= 0) {
+      if (!state.yDown) { state.color = randomColor(); }
+      state.yDown = true;
+    }
+    if (state.translation[1] + height >= gl.canvas.height) {
+      if (state.yDown) { state.color = randomColor(); }
+      state.yDown = false;
+    }
+  }
 
   function render() {
     canvasAndViewportResize(gl);
@@ -140,38 +168,17 @@ function main() {
     // Clear to black
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    angle = angle + 2;
-    let angleInRadians = angle * Math.PI / 180;
-    rotation[0] = Math.sin(angleInRadians);
-    rotation[1] = Math.cos(angleInRadians);
-
     // Set uniforms
     setUniform("u_resolution", [gl.canvas.width, gl.canvas.height]);
-    setUniform("u_translation", translation);
-    setUniform("u_rotation", rotation);
-    setUniform("u_color", color);
+    setUniform("u_translation", state.translation);
+    setUniform("u_rotation", angleToRotation(state.angle));
+    setUniform("u_scale", state.scale);
+    setUniform("u_color", state.color);
 
+    // Draw current contents of buffers
     draw(vertexCount);
 
-    // Update translation and directions
-    xRight ? translation[0]++ : translation[0]--;
-    yDown ? translation[1]++ : translation[1]--;
-    if (translation[0] <= 0) {
-      if (!xRight) { color = randomColor(); }
-      xRight = true;
-    }
-    if (translation[0] + width >= gl.canvas.width) {
-      if (xRight) { color = randomColor(); }
-      xRight = false;
-    }
-    if (translation[1] <= 0) {
-      if (!yDown) { color = randomColor(); }
-      yDown = true;
-    }
-    if (translation[1] + height >= gl.canvas.height) {
-      if (yDown) { color = randomColor(); }
-      yDown = false;
-    }
+    updateState();
 
     // Loop on new frame
     requestAnimationFrame(render);
@@ -218,8 +225,6 @@ function setUniform(name, value) {
   }
 }
 
-
-// Draw current contents of buffers
 function draw(count) {
   let primitiveType = gl.TRIANGLES;
   let offset = 0;
@@ -233,6 +238,11 @@ function randomColor() {
 // Returns a random integer from 0 to range - 1.
 function randomInt(range) {
   return Math.floor(Math.random() * range);
+}
+
+function angleToRotation(angle) {
+  let angleInRadians = angle * Math.PI / 180;
+  return [Math.sin(angleInRadians), Math.cos(angleInRadians)];
 }
 
 // Fills the buffer with the values that define a rectangle.
