@@ -4,25 +4,12 @@ const vs = `#version 300 es
 // It will receive data from a buffer
 in vec2 a_position;
 
-uniform vec2 u_resolution;
 uniform mat3 u_matrix;
 
 // all shaders have a main function
 void main() {
   // Multiply the position by the matrix.
-  vec2 position = (u_matrix * vec3(a_position, 1)).xy;
-
-  // convert the position from pixels to 0.0 to 1.0
-  vec2 zeroToOne = position / u_resolution;
-
-  // convert from 0->1 to 0->2
-  vec2 zeroToTwo = zeroToOne * 2.0;
-
-  // convert from 0->2 to -1->+1 (clipspace)
-  vec2 clipSpace = zeroToTwo - 1.0;
-
-  // Flip clipSpace vertically
-  gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+  gl_Position = vec4((u_matrix * vec3(a_position, 1)).xy, 0, 1);
 }
 `;
 
@@ -65,7 +52,6 @@ function main() {
   const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
 
   uniforms = initUniforms(program, [
-    { name: "u_resolution", type: "2f" },
     { name: "u_matrix", type: "m3f" },
     { name: "u_color", type: "4f" },
   ]);
@@ -157,6 +143,7 @@ function main() {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     // Calculate matrix
+    let projectionMatrix = m3.projection(gl.canvas.clientWidth, gl.canvas.clientHeight);
     let translationMatrix = m3.translation(state.translation[0], state.translation[1]);
     let rotationMatrix = m3.rotation(angleToRadians(state.angle));
     let scaleMatrix = m3.scaling(state.scale[0], state.scale[1]);
@@ -164,7 +151,9 @@ function main() {
     let matrix =
       m3.multiply(
         m3.multiply(
-          m3.multiply(translationMatrix, rotationMatrix),
+          m3.multiply(
+            m3.multiply(projectionMatrix, translationMatrix),
+            rotationMatrix),
           scaleMatrix
         ),
         moveOriginMatrix
@@ -173,7 +162,6 @@ function main() {
       // m3.multiply(, rotationMatrix)
 
     // Set uniforms
-    setUniform("u_resolution", [gl.canvas.width, gl.canvas.height]);
     setUniform("u_matrix", matrix)
     setUniform("u_color", state.color);
 
@@ -309,6 +297,15 @@ function setGeometry(gl) {
 }
 
 let m3 = {
+  projection: function (width, height) {
+    // Note: This matrix flips the Y axis so that 0 is at the top.
+    return [
+      2 / width, 0, 0,
+      0, -2 / height, 0,
+      -1, 1, 1,
+    ];
+  },
+
   translation: function(tx, ty) {
     return [
       1, 0, 0,
