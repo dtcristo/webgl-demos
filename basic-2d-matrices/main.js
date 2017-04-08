@@ -148,18 +148,11 @@ function main() {
     let rotationMatrix = m3.rotation(angleToRadians(state.angle));
     let scaleMatrix = m3.scaling(state.scale[0], state.scale[1]);
     let moveOriginMatrix = m3.translation(-50, -75);
-    let matrix =
-      m3.multiply(
-        m3.multiply(
-          m3.multiply(
-            m3.multiply(projectionMatrix, translationMatrix),
-            rotationMatrix),
-          scaleMatrix
-        ),
-        moveOriginMatrix
-      );
 
-      // m3.multiply(, rotationMatrix)
+    let matrix = m3.multiply(projectionMatrix, translationMatrix);
+    matrix = m3.multiply(matrix, rotationMatrix);
+    matrix = m3.multiply(matrix, scaleMatrix);
+    matrix = m3.multiply(matrix, moveOriginMatrix);
 
     // Set uniforms
     setUniform("u_matrix", matrix)
