@@ -142,17 +142,12 @@ function main() {
     // Clear to black
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    // Calculate matrix
-    let projectionMatrix = m3.projection(gl.canvas.clientWidth, gl.canvas.clientHeight);
-    let translationMatrix = m3.translation(state.translation[0], state.translation[1]);
-    let rotationMatrix = m3.rotation(angleToRadians(state.angle));
-    let scaleMatrix = m3.scaling(state.scale[0], state.scale[1]);
-    let moveOriginMatrix = m3.translation(-50, -75);
-
-    let matrix = m3.multiply(projectionMatrix, translationMatrix);
-    matrix = m3.multiply(matrix, rotationMatrix);
-    matrix = m3.multiply(matrix, scaleMatrix);
-    matrix = m3.multiply(matrix, moveOriginMatrix);
+    // Compute the matrix
+    let matrix = m3.projection(gl.canvas.clientWidth, gl.canvas.clientHeight);
+    matrix = m3.translate(matrix, state.translation[0], state.translation[1]);
+    matrix = m3.rotate(matrix, angleToRadians(state.angle));
+    matrix = m3.scale(matrix, state.scale[0], state.scale[1]);
+    matrix = m3.translate(matrix, -50, -75);
 
     // Set uniforms
     setUniform("u_matrix", matrix)
@@ -355,5 +350,17 @@ let m3 = {
       b20 * a01 + b21 * a11 + b22 * a21,
       b20 * a02 + b21 * a12 + b22 * a22,
     ];
+  },
+
+  translate: function(m, tx, ty) {
+    return m3.multiply(m, m3.translation(tx, ty));
+  },
+
+  rotate: function(m, angleInRadians) {
+    return m3.multiply(m, m3.rotation(angleInRadians));
+  },
+
+  scale: function(m, sx, sy) {
+    return m3.multiply(m, m3.scaling(sx, sy));
   },
 };
