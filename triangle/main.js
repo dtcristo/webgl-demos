@@ -24,11 +24,9 @@ void main() {
 }
 `;
 
-var gl;
-
 function main() {
   // Get A WebGL context
-  gl = document.getElementById("canvas").getContext("webgl2");
+  let gl = document.getElementById("canvas").getContext("webgl2");
 
   if (!gl) {
     alert("No support for WebGL2");
@@ -39,7 +37,10 @@ function main() {
   canvasAndViewportResize(gl);
 
   // Compile the shaders and link into a program
-  let program = webglUtils.createProgramFromSources(gl, [vs, fs]);
+  let program = createProgram(gl,
+    loadShader(gl, gl.VERTEX_SHADER, vs),
+    loadShader(gl, gl.FRAGMENT_SHADER, fs)
+  );
 
   // Create buffers
   let positionBuffer = gl.createBuffer();
@@ -66,10 +67,13 @@ function main() {
   let offset = 0;        // start at the beginning of the buffer
   gl.vertexAttribPointer(aPositionLocation, size, type, normalize, stride, offset);
 
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+  let vertices = [
     -0.5, -0.5,
      0.5, -0.5,
-       0,  0.5]), gl.STATIC_DRAW);
+     0,    0.5
+  ];
+  // Copy data into buffer
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
   // --------------------------------------------------------------------------
 
@@ -82,10 +86,12 @@ function main() {
   offset = 0;
   gl.vertexAttribPointer(aColorLocation, size, type, normalize, stride, offset);
 
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+  let colors = [
     1, 0, 0, 1,
     0, 1, 0, 1,
-    0, 0, 1, 1]), gl.STATIC_DRAW);
+    0, 0, 1, 1
+  ];
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 
   // --------------------------------------------------------------------------
 
@@ -118,12 +124,44 @@ function main() {
 }
 
 function canvasAndViewportResize(gl) {
-  // let cssToRealPixels = window.devicePixelRatio || 1;
-  let cssToRealPixels = 1;
-  if (webglUtils.resizeCanvasToDisplaySize(gl.canvas, cssToRealPixels)) {
-    // Update viewport to new canvas size
+  // let multiplier = window.devicePixelRatio || 1;
+  let multiplier = 1;
+  var width  = gl.canvas.clientWidth  * multiplier | 0;
+  var height = gl.canvas.clientHeight * multiplier | 0;
+  if (gl.canvas.width !== width ||  gl.canvas.height !== height) {
+    gl.canvas.width  = width;
+    gl.canvas.height = height;
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     return true;
   }
   return false;
+}
+
+function loadShader(gl, type, source) {
+  var shader = gl.createShader(type);
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  let compiled = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+  if (!compiled) {
+    let lastError = gl.getShaderInfoLog(shader);
+    error("*** Error compiling shader '" + shader + "':" + lastError);
+    gl.deleteShader(shader);
+    return null;
+  }
+  return shader;
+}
+
+function createProgram(gl, vertexShader, fragmentShader) {
+  let program = gl.createProgram();
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
+  let linked = gl.getProgramParameter(program, gl.LINK_STATUS);
+  if (!linked) {
+      let lastError = gl.getProgramInfoLog(program);
+      error("Error in program linking:" + lastError);
+      gl.deleteProgram(program);
+      return null;
+  }
+  return program;
 }
