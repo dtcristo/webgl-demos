@@ -14,11 +14,11 @@ WebGL is a GPU accelerated rasterization API, based on OpenGL. It can be used to
 
 Note, some info has been taken from [Elm WebGL](https://github.com/elm-community/webgl) docs.
 
-## Rendering Pipeline
+### Rendering Pipeline
 
 ![WebGL Pipeline](https://raw.githubusercontent.com/elm-community/webgl/master/pipeline.png)
 
-## Vertex Shader
+### Vertex Shader
 Takes vertex data and attributes, along with uniforms. Executed once for every vertex. It coverts vertex coordinates to clip space coordinates. Uniforms (constant for all vertexes) are often used for transforming coordinate systems. It also passed varyings (interpolated values) for use in the fragment shader.
 
 #### Inputs
