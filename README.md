@@ -16,13 +16,15 @@ WebGL is a GPU accelerated rasterization API, based on OpenGL. It can be used to
 This diagram summarises the WebGL pipeline.
 
 ![WebGL Pipeline](https://raw.github.com/dtcristo/webgl-demos/master/images/pipeline.png)
-*Image sourced from [Elm WebGL](https://github.com/elm-community/webgl)*
+
+*Image sourced from [Elm WebGL](https://github.com/elm-community/webgl).*
 
 ### Clip space
 Clip space is the coordinate system used by WebGL.
 
 ![Clip space](https://raw.github.com/dtcristo/webgl-demos/master/images/projection.png)
-*Image sourced from [here](https://scs.senecac.on.ca/~gam666/pages/content/3dmat.html)*
+
+*Image sourced from [here](https://scs.senecac.on.ca/~gam666/pages/content/3dmat.html).*
 
 ### Vertex Shader
 Takes vertex data and attributes, along with uniforms. Executed once for every vertex. It coverts vertex coordinates to clip space coordinates. Uniforms (constant for all vertexes) are often used for transforming coordinate systems. It also passed varyings (interpolated values) for use in the fragment shader.
