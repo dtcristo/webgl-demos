@@ -43,7 +43,7 @@ Takes vertex data and attributes, along with uniforms. Executed once for every v
 Part of the pipeline between vertex shader and fragment shader that converts clip space vertices into a grid of pixels (on the viewport) ready for colouring. This stage is automatic and does not require programming.
 
 ### Fragment Shader
-Executed for every pixel (or fragment) in the frame. Varyings from the vertex shader as well as uniforms are used to calculate the colour of the pixel. The fragment shader can be used to render textures or generate advanced lighting effects.
+Executed for every pixel (or fragment) within a triangle. Varyings from the vertex shader as well as uniforms are used to calculate the colour of the pixel. The fragment shader can be used to render textures or generate advanced lighting effects.
 
 #### Inputs
 * **Varyings** - interpolated from vertex shader.
