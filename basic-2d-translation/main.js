@@ -13,14 +13,11 @@ function main() {
 
   var vs = `#version 300 es
 
-  // an attribute is an input (in) to a vertex shader.
-  // It will receive data from a buffer
   in vec2 a_position;
 
   uniform vec2 u_resolution;
   uniform vec2 u_translation;
 
-  // all shaders have a main function
   void main() {
     // Add in the translation
     vec2 position = a_position + u_translation;
@@ -41,18 +38,14 @@ function main() {
 
   var fs = `#version 300 es
 
-  // fragment shaders don't have a default precision so we need
-  // to pick one. mediump is a good default. It means "medium precision"
   precision mediump float;
 
   uniform vec4 u_color;
 
-  // we need to declare an output for the fragment shader
-  out vec4 outColor;
+  out vec4 out_color;
 
   void main() {
-    // Just set the output to a constant redish-purple
-    outColor = u_color;
+    out_color = u_color;
   }
   `;
 
