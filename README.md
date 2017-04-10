@@ -7,6 +7,7 @@ Adventures and learnings in WebGL. Thanks goes to [WebGL2 Fundamentals](https://
 3.  [Translation](https://dtcristo.github.io/webgl-demos/translation/)
 4.  [Rotation](https://dtcristo.github.io/webgl-demos/rotation/)
 5.  [Matrices](https://dtcristo.github.io/webgl-demos/matrices/)
+6.  [3D Cube](https://dtcristo.github.io/webgl-demos/3d-cube/)
 
 ## WebGL Introduction
 
