@@ -169,8 +169,8 @@ function main() {
   function render(time) {
     canvasAndViewportResize(gl);
 
-    // Clear to black
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    // Clear to black and clear depth buffer
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // Convert to seconds
     time *= 0.001;
