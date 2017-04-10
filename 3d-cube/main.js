@@ -49,12 +49,15 @@ function main() {
     loadShader(gl, gl.FRAGMENT_SHADER, fs)
   );
 
-  var aPositionLocation = gl.getAttribLocation(program, "a_position");
-  var aTexcoordLocation = gl.getAttribLocation(program, "a_texcoord");
+  // --------------------------------------------------------------------------
 
   uniforms = initUniforms(program, [
     { name: "u_matrix", type: "m4f" }
   ]);
+
+  // -------------------------- POSITION BUFFER --------------------------------
+
+  let aPositionLocation = gl.getAttribLocation(program, "a_position");
 
   // Create a buffer
   let positionBuffer = gl.createBuffer();
@@ -82,12 +85,16 @@ function main() {
   var offset = 0;
   gl.vertexAttribPointer(aPositionLocation, size, type, normalize, stride, offset);
 
-  // --------------------------------------------------------------------------
+  // ---------------------------- TEXCOORD BUFFER ------------------------------
+
+  var aTexcoordLocation = gl.getAttribLocation(program, "a_texcoord");
 
   // create the texcoord buffer, make it the current ARRAY_BUFFER
   // and copy in the texcoord values
   var texcoordBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
+
+  // Copy texture coordinates data to buffer
   setTexcoords(gl);
 
   // Turn on the attribute
@@ -102,7 +109,7 @@ function main() {
   gl.vertexAttribPointer(
       aTexcoordLocation, size, type, normalize, stride, offset);
 
-  // --------------------------------------------------------------------------
+  // ---------------------------- TEXTURE DATA --------------------------------
 
   // Create a texture.
   var texture = gl.createTexture();
@@ -157,54 +164,7 @@ function main() {
   gl.bindVertexArray(vao);
 
   // --------------------------------------------------------------------------
-
-  // Bounding box, for wall collision
-  let width = 100;
-  let height = 100;
-
-  // Initial state
-  // let state = {
-  //   translation: [
-  //     randomInt(gl.canvas.width - width),
-  //     randomInt(gl.canvas.height - height)
-  //   ],
-  //   angle: 20,
-  //   scale: [1, 2],
-  //   color: randomColor(),
-  //   xRight: true,
-  //   yDown: true,
-  // }
-
-  // function updateState() {
-  //   // Update angle
-  //   state.angle = state.angle + 2;
-  //
-  //   // Update translation and directions
-  //   state.xRight ? state.translation[0]++ : state.translation[0]--;
-  //   state.yDown ? state.translation[1]++ : state.translation[1]--;
-  //   if (state.translation[0] <= 0) {
-  //     if (!state.xRight) { state.color = randomColor(); }
-  //     state.xRight = true;
-  //   }
-  //   if (state.translation[0] + width >= gl.canvas.width) {
-  //     if (state.xRight) { state.color = randomColor(); }
-  //     state.xRight = false;
-  //   }
-  //   if (state.translation[1] <= 0) {
-  //     if (!state.yDown) { state.color = randomColor(); }
-  //     state.yDown = true;
-  //   }
-  //   if (state.translation[1] + height >= gl.canvas.height) {
-  //     if (state.yDown) { state.color = randomColor(); }
-  //     state.yDown = false;
-  //   }
-  // }
-
-  // --------------------------------------------------------------------------
-  // --------------------------------------------------------------------------
-
-  // Get the starting time.
-  var then = 0;
+  // ---------------------------- RENDER LOOP ---------------------------------
 
   function render(time) {
     canvasAndViewportResize(gl);
@@ -212,11 +172,9 @@ function main() {
     // Clear to black
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    // convert to seconds
+    // Convert to seconds
     time *= 0.001;
-    // Subtract the previous time from the current time
     var deltaTime = time - then;
-    // Remember the current time for the next frame.
     then = time;
 
     // Animate the rotation
@@ -232,15 +190,10 @@ function main() {
     var cameraPosition = [0, 0, 2];
     var up = [0, 1, 0];
     var target = [0, 0, 0];
-
-    // Compute the camera's matrix using look at.
     var cameraMatrix = m4.lookAt(cameraPosition, target, up);
 
-    // Make a view matrix from the camera matrix.
     var viewMatrix = m4.inverse(cameraMatrix);
-
     var viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
-
     var matrix = m4.xRotate(viewProjectionMatrix, modelXRotationRadians);
     matrix = m4.yRotate(matrix, modelYRotationRadians);
 
