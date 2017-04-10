@@ -1,6 +1,6 @@
 # WebGL Demos
 
-Adventures and learnings from [WebGL2 Fundamentals](https://webgl2fundamentals.org/).
+Adventures and learnings in WebGL. Thanks goes to [WebGL2 Fundamentals](https://webgl2fundamentals.org/) for the amazing tutorial and example code.
 
 1.  [Triangle](https://dtcristo.github.io/webgl-demos/triangle/)
 2.  [Rectangles](https://dtcristo.github.io/webgl-demos/rectangles/)
