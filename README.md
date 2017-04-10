@@ -22,7 +22,7 @@ This diagram summarises the WebGL pipeline.
 ### Clip space
 Clip space is the coordinate system used by WebGL.
 
-![Clip space](https://raw.github.com/dtcristo/webgl-demos/master/images/projection.png)
+![Clip space](https://raw.github.com/dtcristo/webgl-demos/master/images/clipspace.png)
 
 *Image sourced from [here](https://scs.senecac.on.ca/~gam666/pages/content/3dmat.html).*
 
