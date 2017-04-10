@@ -22,13 +22,13 @@ Note, some info has been taken from [Elm WebGL](https://github.com/elm-community
 Takes vertex data and attributes, along with uniforms. Executed once for every vertex. It coverts vertex coordinates to clip space coordinates. Uniforms (constant for all vertexes) are often used for transforming coordinate systems. It also passed varyings (interpolated values) for use in the fragment shader.
 
 #### Inputs
-* Vertices
-* Attributes
-* Uniforms
+* **Vertex** - vertex coordinates.
+* **Attributes** - any attributes for vertex.
+* **Uniforms** - data used in calculations, constant for all vertices.
 
 #### Outputs
-* gl_Position (clip space coordinates)
-* Varyings
+* **gl_Position** - clip space coordinates for vertex.
+* **Varyings** - interpolated data used in fragment shader.
 
 ### Rasterizer
 Part of the pipeline between vertex shader and fragment shader that converts clip space vertices into a grid of pixels (on the viewport) ready for colouring. This stage is automatic and does not require programming.
@@ -37,8 +37,8 @@ Part of the pipeline between vertex shader and fragment shader that converts cli
 Executed for every pixel (or fragment) in the frame. Varyings from the vertex shader as well as uniforms are used to calculate the colour of the pixel. The fragment shader can be used to render textures or generate advanced lighting effects.
 
 #### Inputs
-* Varyings
-* Uniforms
+* **Varyings** - interpolated from vertex shader.
+* **Uniforms** - data used in calculations, constant for all pixels.
 
 #### Outputs
-* gl_FragColor
+* **gl_FragColor** - output colour of pixel.
