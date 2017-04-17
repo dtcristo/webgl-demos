@@ -6,6 +6,7 @@ import Html.Attributes exposing (width, height, style)
 import Math.Matrix4 as Matrix4 exposing (Mat4)
 import Math.Vector3 as Vector3 exposing (Vec3, vec3)
 import Math.Vector4 as Vector4 exposing (Vec4, vec4)
+import Random exposing (Generator, Seed)
 import Task
 import Time exposing (Time)
 import WebGL exposing (Mesh, Shader)
@@ -25,6 +26,12 @@ main =
 -- MODEL
 
 
+type alias Position =
+    { x : Float
+    , y : Float
+    }
+
+
 type Direction
     = Positive
     | Negative
@@ -35,25 +42,30 @@ type alias Color =
 
 
 type alias Model =
-    { size : Window.Size
-    , x : Float
-    , y : Float
-    , xDirection : Direction
-    , yDirection : Direction
+    { position : Position
+    , direction :
+        { x : Direction
+        , y : Direction
+        }
     , color : Color
+    , size : Window.Size
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { size = Window.Size 0 0
-      , x = 100
-      , y = 100
-      , xDirection = Positive
-      , yDirection = Positive
-      , color = vec4 0 0 1 1
+    ( { position = Position 100 100
+      , direction =
+            { x = Positive
+            , y = Positive
+            }
+      , color = vec4 0 0 0 1
+      , size = Window.Size 0 0
       }
-    , Task.perform Resize Window.size
+    , Cmd.batch
+        [ Random.generate NewColor randomColor
+        , Task.perform Resize Window.size
+        ]
     )
 
 
@@ -64,6 +76,7 @@ init =
 type Msg
     = Resize Window.Size
     | Frame Time
+    | NewColor Color
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -73,27 +86,39 @@ update msg model =
             ( { model | size = size }, Cmd.none )
 
         Frame dt ->
-            ( step model dt, Cmd.none )
+            step model dt
+
+        NewColor newColor ->
+            ( { model | color = newColor }, Cmd.none )
 
 
-step : Model -> Time -> Model
+step : Model -> Time -> ( Model, Cmd Msg )
 step model dt =
     let
         ds =
-            dt / 20
+            1
 
         ( xNew, xDirectionNew, xBounce ) =
-            stepDirection model.size.width model.xDirection model.x ds
+            stepDirection model.size.width model.direction.x model.position.x ds
 
         ( yNew, yDirectionNew, yBounce ) =
-            stepDirection model.size.height model.yDirection model.y ds
+            stepDirection model.size.height model.direction.y model.position.y ds
+
+        cmd =
+            if xBounce || yBounce then
+                Random.generate NewColor randomColor
+            else
+                Cmd.none
     in
-        { model
-            | x = xNew
-            , y = yNew
-            , xDirection = xDirectionNew
-            , yDirection = yDirectionNew
-        }
+        ( { model
+            | position = Position xNew yNew
+            , direction =
+                { x = xDirectionNew
+                , y = yDirectionNew
+                }
+          }
+        , cmd
+        )
 
 
 stepDirection : Int -> Direction -> Float -> Float -> ( Float, Direction, Bool )
@@ -118,6 +143,19 @@ stepDirection size direction initial ds =
                     ( new, Positive, True )
                 else
                     ( new, Negative, False )
+
+
+randomColor : Generator Color
+randomColor =
+    Random.map
+        -- Keep alpha level constant
+        (\a -> a 1)
+        (Random.map3
+            vec4
+            (Random.float 0 1)
+            (Random.float 0 1)
+            (Random.float 0 1)
+        )
 
 
 
@@ -228,7 +266,7 @@ fragmentShader =
 transformation : Model -> Mat4
 transformation model =
     projection model.size
-        |> Matrix4.translate (vec3 model.x model.y 0)
+        |> Matrix4.translate (vec3 model.position.x model.position.y 0)
         |> Matrix4.scale (vec3 meshScale meshScale 0)
 
 
