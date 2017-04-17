@@ -165,7 +165,7 @@ randomColor =
 view : Model -> Html Msg
 view model =
     WebGL.toHtmlWith
-        [ WebGL.clearColor 0 0 0 0 ]
+        [ WebGL.clearColor 0 0 0 1 ]
         [ width model.size.width
         , height model.size.height
         , style [ ( "display", "block" ) ]
